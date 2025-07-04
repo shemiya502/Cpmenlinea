@@ -137,7 +137,6 @@ app.use(bodyParser.json());
       socketTarget.emit("redirigir", url);
     }
   });
-});
 
 // Respuesta a botones desde Telegram
 bot.on('callback_query', (query) => {
